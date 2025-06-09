@@ -8,19 +8,38 @@ using namespace std;
 void Randomizer() {
     srand(static_cast<unsigned int>(time(0)));  // pridan static_cast<unsigned int>
 }
+// Kontrola game over: pokud v inventari existuje "Revive", ozyje se, jinak konec hry
+// PUVODNE pracovalo s int&, nyni prijima float&, aby sedelo s typem zivoty
+bool GameOver(float &zzivoty, string Inventar[5], float mxzivoty) {
+    for (int i = 0; i < 5; i++) {
+        if (Inventar[i] == "Revive") {
+            cout << "Jste oziveny!\n";
+            zzivoty = mxzivoty;
+            Inventar[i].clear();  // Revive se spotrebuje
+            return false;
+        }
+    }
+    cout << "Sorry, nemas zadny revives.\n";
+    return true;
+}
 
-void utokFunkcenormalEnemy(int pocetEnemies, float &zivotyhrace) {
+void utokFunkcenormalEnemy(int pocetEnemies, float &zivotyhrace, float mxzivoty, string Inventar[5]) {
     for(int i = 0; i < pocetEnemies; i++){
     float poskozeni = static_cast<float>(rand()) / RAND_MAX * 0.6f + 0.2f;
     cout << "Nepritel#" << i + 1 << " zpusobil " << poskozeni << " poskozeni.\n";
     zivotyhrace -= poskozeni;
+
+    if(zivotyhrace <= 0){
+        zivotyhrace = 0;
+        GameOver(zivotyhrace, Inventar, mxzivoty);
+    }
     }
 }
 // Vraci nahodny pocet enemy (1-3)
 // PUVODNE funkce nic nevracela, nyni vraci int
-void generovaniEnemies(float zzivoty) {
+void generovaniEnemies(float zzivoty, float mxzivoty, string Inventar[5]) {
     int enemyReturn = rand() % 3 + 1;  // pridano return
-    utokFunkcenormalEnemy(enemyReturn, zzivoty);
+    utokFunkcenormalEnemy(enemyReturn, zzivoty, mxzivoty, Inventar);
 }
 
 // Vesnice: doplneni zivota nebo nakup
@@ -94,20 +113,7 @@ void vesniceGenerovani(float &zivotyx, float mxzivotyx, string Inventar[5]) {
     }
 }
 
-// Kontrola game over: pokud v inventari existuje "Revive", ozyje se, jinak konec hry
-// PUVODNE pracovalo s int&, nyni prijima float&, aby sedelo s typem zivoty
-bool GameOver(float &zzivoty, string Inventar[5], float mxzivoty) {
-    for (int i = 0; i < 5; i++) {
-        if (Inventar[i] == "Revive") {
-            cout << "Jste oziveny!\n";
-            zzivoty = mxzivoty;
-            Inventar[i].clear();  // Revive se spotrebuje
-            return false;
-        }
-    }
-    cout << "Sorry, nemas zadny revives.\n";
-    return true;
-}
+
 
 // Pravdepodobnost, ze se objevi strom (20%)
 bool StromAppearance() {
@@ -167,7 +173,7 @@ void generujLevel(int Level, float &Zivoty, string Inventar[5], float mxzivoty) 
         // PUVODNE se volalo bez parametru, opraveno
     }
     if (Level >= 1 && Level <= 15){
-        generovaniEnemies(Zivoty);
+        generovaniEnemies(Zivoty, mxzivoty, Inventar);
     }
 
     // Strom se muze objevit na kazdem levelu
