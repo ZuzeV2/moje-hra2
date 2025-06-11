@@ -23,23 +23,79 @@ bool GameOver(float &zzivoty, string Inventar[5], float mxzivoty) {
     return true;
 }
 
-void utokFunkcenormalEnemy(int pocetEnemies, float &zivotyhrace, float mxzivoty, string Inventar[5]) {
-    for(int i = 0; i < pocetEnemies; i++){
-    float poskozeni = static_cast<float>(rand()) / RAND_MAX * 0.6f + 0.2f;
-    cout << "Nepritel#" << i + 1 << " zpusobil " << poskozeni << " poskozeni.\n";
-    zivotyhrace -= poskozeni;
-
-    if(zivotyhrace <= 0){
-        zivotyhrace = 0;
-        GameOver(zivotyhrace, Inventar, mxzivoty);
-    }
-    }
-}
 // Vraci nahodny pocet enemy (1-3)
 // PUVODNE funkce nic nevracela, nyni vraci int
-void generovaniEnemies(float zzivoty, float mxzivoty, string Inventar[5]) {
+void soubojSequence(float zzivoty, float mxzivoty, string Inventar[5], string Klasa, float Utok, float enemyZivoty[3], int enemyReturn){
+    int akce;
+do{
+cout << "Co chcete delat za akci?\n";
+cout << "1 - Utok\n";
+cout << "2 - Kouknot do inventare\n";
+cout << "3 - Specialni abilitky\n";
+cout << "4 - Preskocit svuj turn\n";
+cin >> akce;
+}while(!(akce == 1 || akce == 2 || akce == 3 || akce == 4));
+
+if(akce == 1){
+    int cil;
+
+    do{
+            cout << "Na ktereho nepritele chcete utocit?\n";
+    for(int i = 0; i < enemyReturn; i++){
+        cout << "Nepritel#" << i + 1 << "ma " << enemyZivoty[i] << "HP\n";
+          }
+    cin >> cil;
+    cil--;
+    }while(cil < 0 || cil >= enemyReturn || enemyZivoty[cil] <= 0);
+
+    //utok
+    float poskozeni = Utok;
+    enemyZivoty[cil] -= poskozeni;
+     cout << "Utocil jsi nepritele " << cil + 1 << "a zpusobil jsi " << poskozeni << "poskozeni! Zbyle zivoty: " << enemyZivoty[cil] << "\n";
+     if (enemyZivoty[cil] < 0){
+        enemyZivoty[cil] = 0;
+        cout << "Nepritel" << cil + 1 << "zemrel\n";
+
+}
+}
+}
+void generovaniEnemies(float &zzivoty, float mxzivoty, string Inventar[5], string Klasa, float Utok) {
     int enemyReturn = rand() % 3 + 1;  // pridano return
-    utokFunkcenormalEnemy(enemyReturn, zzivoty, mxzivoty, Inventar);
+    float enemyZivoty[3];
+
+    for (int i = 0; i < enemyReturn; i++) {
+        enemyZivoty[i] = 5.0f;
+    }
+    while (true) {
+        bool vsichniMrtvi = true;
+        for (int i = 0; i < enemyReturn; i++) {
+            if (enemyZivoty[i] > 0) {
+                vsichniMrtvi = false;
+                break;
+            }
+        }
+        if (vsichniMrtvi) {
+            cout << "Vsichni nepratele byli porazeni!\n";
+            break;
+        }
+    soubojSequence(zzivoty, mxzivoty, Inventar, Klasa, Utok, enemyZivoty, enemyReturn);
+    for(int i = 0; i < enemyReturn; i++){
+            if(enemyZivoty[i] > 0){
+                float poskozeni = static_cast<float>(rand()) / RAND_MAX * 0.9f + 0.1f;
+    cout << "Nepritel#" << i + 1 << " zpusobil " << poskozeni << " poskozeni.\n";
+        zzivoty -= poskozeni;
+        cout << "Mas " << zzivoty << "zivotu\n";
+            if(zzivoty <= 0){
+        zzivoty = 0;
+        bool konec = GameOver(zzivoty, Inventar, mxzivoty);
+        if(konec){
+            cout << "Game Over\n";
+            return;
+        }
+    }
+            }
+    }
+}
 }
 
 // Vesnice: doplneni zivota nebo nakup
@@ -153,7 +209,7 @@ void stromFall(float &zzivoty, string Inventar[5]) {
 }
 
 // Vygeneruje jeden level: kontrola zivota, vesnice, strom
-void generujLevel(int Level, float &Zivoty, string Inventar[5], float mxzivoty) {
+void generujLevel(int Level, float &Zivoty, string Inventar[5], float mxzivoty, string klasa, float Utok){
     cout << "Level: " << Level << "\n";
 
     // Kontrola game over
@@ -168,12 +224,12 @@ void generujLevel(int Level, float &Zivoty, string Inventar[5], float mxzivoty) 
     }
 
     // Vesnice na urcitych levelech
-    if (Level == 3 || Level == 6 || Level == 11 || Level == 13 || Level == 15 || Level == 19) {
+    if (Level == 3 || Level == 6 || Level == 9 || Level == 12) {
         vesniceGenerovani(Zivoty, mxzivoty, Inventar);
         // PUVODNE se volalo bez parametru, opraveno
     }
-    if (Level >= 1 && Level <= 15){
-        generovaniEnemies(Zivoty, mxzivoty, Inventar);
+    if (Level >= 1 && Level <= 15 && !(Level == 3 || Level == 6 || Level == 9 || Level == 12)){
+        generovaniEnemies(Zivoty, mxzivoty, Inventar, klasa, Utok);
     }
 
     // Strom se muze objevit na kazdem levelu
@@ -216,6 +272,7 @@ int main() {
     string jmeno;
     string decision2 = "Ne";
     int decision1;
+    string klasa3;
 
     float maxzivoty = 0.0f;
     float zivoty = 0.0f;
@@ -251,6 +308,7 @@ int main() {
                     maxzivoty = klasyy[0][0];
                     utok      = klasyy[0][1];
                     energie   = klasyy[0][2];
+                    klasa3 = "Paladin";
                     cout << "Vybrali jste si Paladina.\n";
                 }
                 break;
@@ -265,6 +323,7 @@ int main() {
                     maxzivoty = klasyy[1][0];
                     utok      = klasyy[1][1];
                     energie   = klasyy[1][2];
+                    klasa3 = "Lovec";
                     cout << "Vybrali jste si Lovce.\n";
                 }
                 break;
@@ -279,6 +338,7 @@ int main() {
                     maxzivoty = klasyy[2][0];
                     utok      = klasyy[2][1];
                     energie   = klasyy[2][2];
+                    klasa3 = "Warlock";
                     cout << "Vybrali jste si Warlocka.\n";
                 }
                 break;
@@ -293,6 +353,7 @@ int main() {
                     maxzivoty = klasyy[3][0];
                     utok      = klasyy[3][1];
                     energie   = klasyy[3][2];
+                    klasa3 = "Mag";
                     cout << "Vybrali jste si Maga.\n";
                 }
                 break;
@@ -306,10 +367,11 @@ int main() {
 
     // Nastaveni aktualniho zivota po vyberu tridy
     zivoty = maxzivoty;  // doplneno, jinak by zivoty nebyly inicializovane
-
-    // Prochazeni Levely 1-15
+// mini boss = level 7, 13
+//boss = level 15
+// Prochazeni Levely 1-15
     for (int level = 1; level <= 15; level++) {
-        generujLevel(level, zivoty, inventar, maxzivoty);
+        generujLevel(level, zivoty, inventar, maxzivoty, klasa3, utok);
         cout << "\n";
     }
 
