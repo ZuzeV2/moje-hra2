@@ -25,10 +25,12 @@ bool GameOver(float &zzivoty, string Inventar[5], float mxzivoty) {
 
 // Vraci nahodny pocet enemy (1-3)
 // PUVODNE funkce nic nevracela, nyni vraci int
-void soubojSequence(float zzivoty, float mxzivoty, string Inventar[5], string Klasa, float Utok, float enemyZivoty[3], int enemyReturn, float &mana, float maxmana){
+void soubojSequence(float &zzivoty, float mxzivoty, string Inventar[5], string Klasa, float Utok, float enemyZivoty[3], int enemyReturn, float &mana, float maxmana, bool &neviditelnost){
+    int cil;
     int akce;
     int inventar2;
     bool prazdny;
+    int special;
 //smycka pro opakovani vyberu
 while(true){
 do{
@@ -42,7 +44,6 @@ cin >> akce;
 
 switch(akce){
 case 1:{
-    int cil;
 
     do{
             cout << "Na ktereho nepritele chcete utocit?\n";
@@ -132,8 +133,185 @@ case 2:{
  return;
 }
 case 3:{
-cout << "WIP\n";
-return;
+    if(Klasa == "Paladin"){
+        cout << "Co chcete pouzit?\n";
+        cout << "1 - Uder svetlem = 2 poskozeni vsem nepratelum (-2 mana)\n";
+        cout << "2 - Oziveni = Pridani 2 zivotu (-2 mana)\n";
+        cout << "0 - Nic\n";
+        cin >> special;
+        if (!(special == 1 || special == 2)){
+                cout << "Zadali jste spatne cislo, nebo jste zrusili svuj attack\n";
+            continue;
+        }
+        if(mana < 2){
+            cout << "Nemas dost many\n";
+            continue;
+        }
+        mana -= 2;
+
+        if(special == 1){
+            cout << "Pouzil jsi uder svetlem!";
+            for (int i = 0; i < enemyReturn; i++){
+                enemyZivoty[i] -= 2;
+                if (enemyZivoty[i] < 0){
+                    enemyZivoty[i] = 0;}
+                    cout << "Nepratel#" << i + 1 << "ma ted: " << enemyZivoty[i] << " HP\n";
+
+                }
+            }
+        else if (special == 2){
+            zzivoty += 2;
+            if (zzivoty > mxzivoty){
+                zzivoty = mxzivoty;
+            }
+            cout << "Pouzil jsi oziveni. Mas ted: " << zzivoty << " zivotu\n";
+        }
+    return;
+    }
+    if (Klasa == "Lovec"){
+     cout << "Co chcete pouzit?\n";
+        cout << "1 - Smrtici sip = zasahne nepritele za 6 dmg (-2 mana)\n";
+        cout << "2 - Ukryt ve stinu = Budes neporazitelny pri levelu (-5 mana)\n";
+        cout << "0 - Nic\n";
+        cin >> special;
+     if (!(special == 1 || special == 2)){
+                cout << "Zadali jste spatne cislo, nebo jste zrusili svuj attack\n";
+            continue;
+        }
+        if(special == 1){
+                if (mana < 2){
+                    cout << "Nemate dostatek many\n";
+                    continue;
+                }
+        else{
+        do{
+            cout << "Na ktereho nepritele chcete utocit?\n";
+            for(int i = 0; i < enemyReturn; i++){
+            cout << "Nepritel#" << i + 1 << "ma " << enemyZivoty[i] << "HP\n";
+            }
+            cin >> cil;
+            cil--;
+        }while(cil < 0 || cil >= enemyReturn || enemyZivoty[cil] <= 0);
+
+        mana -= 2;
+        enemyZivoty[cil] -= 6;
+        if(enemyZivoty[cil] < 0){
+            enemyZivoty[cil] = 0;
+        }
+        cout << "Nepritel#" << cil + 1 << "ma ted: " << enemyZivoty[cil] << " HP\n";
+        }
+        }
+        else if (special == 2){
+                if(mana < 5){
+                    cout << "Nemate dost many\n";
+                    continue;
+                }
+                else{
+                    mana -= 5;
+                    neviditelnost = true;
+                    cout <<"Pouzil jsi ukryt ve stinu, a ted na vas nepritele nebudou utocit\n";
+                }
+            }
+            return;
+        }
+    if (Klasa == "Warlock"){
+        cout << "Co chcete pouzit?\n";
+        cout << "1 - Krvavy ritual = Obetovani 1 zivot za 2 many\n";
+        cout << "2 - Temny vyboj = Udelej 10 dmg na nepritele (-2,5 mana)\n";
+        cout << "0 - Nic\n";
+        cin >> special;
+     if (!(special == 1 || special == 2)){
+                cout << "Zadali jste spatne cislo, nebo jste zrusili svuj attack\n";
+            continue;
+        }
+     if(special == 1){
+            if(zzivoty <= 1){
+                cout << "Nemate dost zivotu\n";
+                continue;
+            }
+            else if(mana >= maxmana){
+                cout << "Nemate misto pro manu\n";
+                continue;
+            }
+            else{
+            zzivoty -= 1;
+            mana += 2;
+            if(mana > maxmana){
+                mana = maxmana;
+            }
+            cout << "Pouzil jsi krvavy ritual!\n";
+            cout << "Mas ted: " << zzivoty << " zivotu a " << mana << " many\n";
+            }
+        }
+    else if (special == 2){
+    if (mana < 2.5){
+        cout << "Nemate dostatek many\n";
+        continue;
+    }
+    else{
+        do{
+            cout << "Na ktereho nepritele chcete utocit?\n";
+            for(int i = 0; i < enemyReturn; i++){
+            cout << "Nepritel#" << i + 1 << "ma " << enemyZivoty[i] << "HP\n";
+            }
+            cin >> cil;
+            cil--;
+        }while(cil < 0 || cil >= enemyReturn || enemyZivoty[cil] <= 0);
+
+        mana -= 2.5;
+        enemyZivoty[cil] -= 10;
+        if(enemyZivoty[cil] < 0){
+            enemyZivoty[cil] = 0;
+        }
+        cout << "Pouzil jste temny vyboj a nepritel#" << cil + 1 << "ma ted: " << enemyZivoty[cil] << " HP\n";
+    }
+    }
+    return;
+    }
+    if (Klasa == "Mag"){
+         cout << "Co chcete pouzit?\n";
+        cout << "1 - Ohniva koule = 6 poskozeni jednomu nepriteli (-2 mana)\n";
+        cout << "2 - Retezovy blesk = 5 poskozeni vsem nepratelum (-4 mana)\n";
+        cout << "0 - Nic\n";
+        cin >> special;
+     if (!(special == 1 || special == 2)){
+                cout << "Zadali jste spatne cislo, nebo jste zrusili svuj attack\n";
+            continue;
+        }
+    if(special == 1){
+        if(mana < 2){
+            cout << "Nemate dostatek many\n";
+            continue;
+        }
+        else{
+              do{
+            cout << "Na ktereho nepritele chcete utocit?\n";
+            for(int i = 0; i < enemyReturn; i++){
+            cout << "Nepritel#" << i + 1 << "ma " << enemyZivoty[i] << "HP\n";
+            }
+            cin >> cil;
+            cil--;
+        }while(cil < 0 || cil >= enemyReturn || enemyZivoty[cil] <= 0);
+
+        mana -= 2;
+        enemyZivoty[cil] -= 6;
+        if (enemyZivoty[cil] < 0){
+            enemyZivoty[cil] = 0;
+        }
+        cout << "Nepritel#" << cil + 1 << "ma ted " << enemyZivoty[cil] << " HP\n";
+        }
+    }
+    else if (special == 2){
+            cout << "Pouzil jsi retezovy blesk!";
+            for (int i = 0; i < enemyReturn; i++){
+                enemyZivoty[i] -= 5;
+                if (enemyZivoty[i] < 0){
+                    enemyZivoty[i] = 0;}
+                    cout << "Nepratel#" << i + 1 << "ma ted: " << enemyZivoty[i] << " HP\n";
+                }
+    }
+        return;
+    }
 }
 case 4:{
     cout << "Preskocil jsi svuj turn\n";
@@ -142,8 +320,8 @@ case 4:{
 }
 }
 }
-
 void generovaniEnemies(float &zzivoty, float mxzivoty, string Inventar[5], string Klasa, float Utok, float &mana, float maxmana) {
+    bool neviditelnost = false;
     int enemyReturn = rand() % 3 + 1;  // pridano return
     float enemyZivoty[3];
 
@@ -163,13 +341,19 @@ void generovaniEnemies(float &zzivoty, float mxzivoty, string Inventar[5], strin
             cout << "Vsichni nepratele byli porazeni!\n";
             break;
         }
-    soubojSequence(zzivoty, mxzivoty, Inventar, Klasa, Utok, enemyZivoty, enemyReturn, mana, maxmana);
+    soubojSequence(zzivoty, mxzivoty, Inventar, Klasa, Utok, enemyZivoty, enemyReturn, mana, maxmana, neviditelnost);
     for(int i = 0; i < enemyReturn; i++){
             if(enemyZivoty[i] > 0){
                 float poskozeni = static_cast<float>(rand()) / RAND_MAX * 0.9f + 0.1f;
+        if(!neviditelnost){
     cout << "Nepritel#" << i + 1 << " zpusobil " << poskozeni << " poskozeni.\n";
         zzivoty -= poskozeni;
         cout << "Mas " << zzivoty << "zivotu\n";
+        }
+        else{
+            cout << "Nepritel#" << i + 1 << " te nevidel a minul jeho utok\n";
+        }
+
             if(zzivoty <= 0){
         zzivoty = 0;
         bool konec = GameOver(zzivoty, Inventar, mxzivoty);
@@ -181,6 +365,7 @@ void generovaniEnemies(float &zzivoty, float mxzivoty, string Inventar[5], strin
             }
     }
 }
+neviditelnost = false;
 }
 
 // Vesnice: doplneni zivota nebo nakup
