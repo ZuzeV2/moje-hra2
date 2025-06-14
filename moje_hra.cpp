@@ -114,7 +114,7 @@ case 2:{
         mana = maxmana;
         }
         cout << "Vypil jsi alkohol. Mana je ted " << mana << ".\n";
-    } else if (item == "Magicky potion") {
+    } else if (item == "Magickypotion") {
         zzivoty += 5;
         if (zzivoty > mxzivoty){
             zzivoty = mxzivoty;
@@ -367,6 +367,52 @@ void generovaniEnemies(float &zzivoty, float mxzivoty, string Inventar[5], strin
 }
 neviditelnost = false;
 }
+void generovaniMiniBoss(float &zzivoty, float mxzivoty, string Inventar[5], string Klasa, float Utok, float &mana, float maxmana){
+bool neviditelnost = false;
+    int enemyReturn = 1;
+    float enemyZivoty[1] = {15.0f};
+
+    cout << "Objevil se mini boss s " << enemyZivoty[0] << " HP\n";
+    while (true) {
+        bool vsichniMrtvi = true;
+        for (int i = 0; i < enemyReturn; i++) {
+            if (enemyZivoty[i] > 0) {
+                vsichniMrtvi = false;
+                break;
+            }
+        }
+        if (vsichniMrtvi) {
+            cout << "Miniboss byl porazen!\n";
+            break;
+        }
+    soubojSequence(zzivoty, mxzivoty, Inventar, Klasa, Utok, enemyZivoty, enemyReturn, mana, maxmana, neviditelnost);
+    for(int i = 0; i < enemyReturn; i++){
+            if(enemyZivoty[i] > 0){
+                float poskozeni = static_cast<float>(rand()) / RAND_MAX * 2.5f + 0.5f;
+        if(!neviditelnost){
+    cout << "Miniboss zpusobil " << poskozeni << " poskozeni.\n";
+        zzivoty -= poskozeni;
+        cout << "Mas " << zzivoty << "zivotu\n";
+        }
+        else{
+            cout << "Miniboss te nevidel a minul jeho utok\n";
+        }
+
+            if(zzivoty <= 0){
+        zzivoty = 0;
+        bool konec = GameOver(zzivoty, Inventar, mxzivoty);
+        if(konec){
+            cout << "Game Over\n";
+            return;
+        }
+    }
+            }
+    }
+}
+neviditelnost = false;
+}
+
+
 
 // Vesnice: doplneni zivota nebo nakup
 // Odstranen zbytecny parametr penizze, upravena signatura
@@ -403,7 +449,14 @@ void vesniceGenerovani(float &zivotyx, float mxzivotyx, string Inventar[5], floa
             switch (volba2) {
                 case 1:
                     // TODO: implementace susenky
-                    cout << "Koupil sis susenku. (Jeji ucinek zatim nedefinovan.)\n";
+                    cout << "Koupil sis susenku.\n";
+                     for (int i = 0; i < 5; i++) {
+                        if (Inventar[i].empty()) {
+                            Inventar[i] = "Susenka";
+                            cout << "Susenka pridana do inventare na pozici " << i + 1 << ".\n";
+                            break;
+                        }
+                    }
                     break;
 
                 case 2:
@@ -420,12 +473,26 @@ void vesniceGenerovani(float &zivotyx, float mxzivotyx, string Inventar[5], floa
 
                 case 3:
                     // TODO: implementace alkoholu
-                    cout << "Koupil sis alkohol. (Jeho ucinek zatim nedefinovan.)\n";
+                    cout << "Koupil sis alkohol.\n";
+                    for (int i = 0; i < 5; i++) {
+                        if (Inventar[i].empty()) {
+                            Inventar[i] = "Alkohol";
+                            cout << "Alkohol pridan do inventare na pozici " << i + 1 << ".\n";
+                            break;
+                        }
+                    }
                     break;
 
                 case 4:
                     // TODO: implementace magickeho potiona
-                    cout << "Koupil sis magicky potion. (Jeho ucinek zatim nedefinovan.)\n";
+                    cout << "Koupil sis magicky potion.\n";
+                    for (int i = 0; i < 5; i++) {
+                        if (Inventar[i].empty()) {
+                            Inventar[i] = "Magickypotion";
+                            cout << "Magicky potion pridan do inventare na pozici " << i + 1 << ".\n";
+                            break;
+                        }
+                    }
                     break;
 
                 case 5:
@@ -499,10 +566,12 @@ void generujLevel(int Level, float &Zivoty, string Inventar[5], float mxzivoty, 
         vesniceGenerovani(Zivoty, mxzivoty, Inventar, mana, maxmana);
         // PUVODNE se volalo bez parametru, opraveno
     }
-    if (Level >= 1 && Level <= 15 && !(Level == 3 || Level == 6 || Level == 9 || Level == 12)){
+    else if (Level >= 1 && Level <= 15 && !(Level == 3 || Level == 7 || Level == 6 || Level == 9 || Level == 12 || Level == 13)){
         generovaniEnemies(Zivoty, mxzivoty, Inventar, klasa, Utok, mana, maxmana);
     }
-
+    else if (Level == 7 || Level == 13){
+        generovaniMiniBoss(Zivoty, mxzivoty, Inventar, klasa, Utok, mana, maxmana);
+    }
     // Strom se muze objevit na kazdem levelu
     if (StromAppearance()) {
         cout << "Nasel si strom! Mozna neco z neho dostanes..\n";
