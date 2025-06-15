@@ -20,7 +20,7 @@ bool GameOver(float &zzivoty, string Inventar[5], float mxzivoty) {
         }
     }
     cout << "Sorry, nemas zadny revives.\n";
-    cout << "Game over\n";
+    cout << "Game Over\n";
     exit(0);
     return true;
 }
