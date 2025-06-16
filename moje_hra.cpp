@@ -323,7 +323,7 @@ case 4:{
 }
 }
 }
-void generovaniEnemies(float &zzivoty, float mxzivoty, string Inventar[5], string Klasa, float Utok, float &mana, float maxmana) {
+void generovaniEnemies(float &zzivoty, float mxzivoty, string Inventar[5], string Klasa, float Utok, float &mana, float maxmana, float &penize2) {
     bool neviditelnost = false;
     int enemyReturn = rand() % 3 + 1;  // pridano return
     float enemyZivoty[3];
@@ -342,6 +342,7 @@ void generovaniEnemies(float &zzivoty, float mxzivoty, string Inventar[5], strin
         }
         if (vsichniMrtvi) {
             cout << "Vsichni nepratele byli porazeni!\n";
+            penize2 += 5;
             break;
         }
     soubojSequence(zzivoty, mxzivoty, Inventar, Klasa, Utok, enemyZivoty, enemyReturn, mana, maxmana, neviditelnost);
@@ -370,7 +371,7 @@ void generovaniEnemies(float &zzivoty, float mxzivoty, string Inventar[5], strin
 }
 neviditelnost = false;
 }
-void generovaniMiniBoss(float &zzivoty, float mxzivoty, string Inventar[5], string Klasa, float Utok, float &mana, float maxmana){
+void generovaniMiniBoss(float &zzivoty, float mxzivoty, string Inventar[5], string Klasa, float Utok, float &mana, float maxmana, float &penize2){
 bool neviditelnost = false;
     int enemyReturn = 1;
     float enemyZivoty[1] = {15.0f};
@@ -386,6 +387,7 @@ bool neviditelnost = false;
         }
         if (vsichniMrtvi) {
             cout << "Miniboss byl porazen!\n";
+            penize2 += 15;
             break;
         }
     soubojSequence(zzivoty, mxzivoty, Inventar, Klasa, Utok, enemyZivoty, enemyReturn, mana, maxmana, neviditelnost);
@@ -792,7 +794,7 @@ neviditelnost = false;
 
 // Vesnice: doplneni zivota nebo nakup
 // Odstranen zbytecny parametr penizze, upravena signatura
-void vesniceGenerovani(float &zivotyx, float mxzivotyx, string Inventar[5], float &mana, float maxmana) {
+void vesniceGenerovani(float &zivotyx, float mxzivotyx, string Inventar[5], float &mana, float maxmana, float &penize2) {
     int volba, volba2;
 while(true){
     do {
@@ -826,6 +828,8 @@ while(true){
             switch (volba2) {
                 case 1:
                     // TODO: implementace susenky
+                    if(penize2 >= 5){
+                        penize2 -= 5;
                     cout << "Koupil sis susenku.\n";
                      for (int i = 0; i < 5; i++) {
                         if (Inventar[i].empty()) {
@@ -833,11 +837,15 @@ while(true){
                             cout << "Susenka pridana do inventare na pozici " << i + 1 << ".\n";
                             break;
                         }
+                    }}
+                    if(penize2 < 5){
+                        cout << "Nemate dost penez.\n";
                     }
                     break;
 
                 case 2:
                     // TODO: implementace revive
+                    if(penize2 >= 7){
                     cout << "Koupil sis revive. (Ulozeno do inventare.)\n";
                     for (int i = 0; i < 5; i++) {
                         if (Inventar[i].empty()) {
@@ -845,11 +853,15 @@ while(true){
                             cout << "Revive pridano do inventare na pozici " << i + 1 << ".\n";
                             break;
                         }
+                    }}
+                    if(penize2 < 7){
+                        cout << "Nemate dost penez.\n";
                     }
                     break;
 
                 case 3:
                     // TODO: implementace alkoholu
+                    if(penize2 >= 5){
                     cout << "Koupil sis alkohol.\n";
                     for (int i = 0; i < 5; i++) {
                         if (Inventar[i].empty()) {
@@ -857,11 +869,15 @@ while(true){
                             cout << "Alkohol pridan do inventare na pozici " << i + 1 << ".\n";
                             break;
                         }
+                    }}
+                    if(penize2 < 5){
+                        cout << "Nemate dost penez.\n";
                     }
                     break;
 
                 case 4:
                     // TODO: implementace magickeho potiona
+                    if(penize2 >= 15){
                     cout << "Koupil sis magicky potion.\n";
                     for (int i = 0; i < 5; i++) {
                         if (Inventar[i].empty()) {
@@ -869,6 +885,9 @@ while(true){
                             cout << "Magicky potion pridan do inventare na pozici " << i + 1 << ".\n";
                             break;
                         }
+                    }}
+                    if(penize2 < 15){
+                        cout << "Nemate dost penez.\n";
                     }
                     break;
 
@@ -926,10 +945,10 @@ void stromFall(float &zzivoty, string Inventar[5]) {
 }
 
 // Vygeneruje jeden level: kontrola zivota, vesnice, strom
-void generujLevel(int Level, float &Zivoty, string Inventar[5], float mxzivoty, string klasa, float Utok, float &mana, float maxmana){
+void generujLevel(int Level, float &Zivoty, string Inventar[5], float mxzivoty, string klasa, float Utok, float &mana, float maxmana, float &penize2){
     cout << "Level: " << Level << "\n";
 
-    // Kontrola game over
+    // Kontrola game over - zbytecne ale necham protoze proc ne
     if (Zivoty <= 0) {
         Zivoty = 0;
         bool over = GameOver(Zivoty, Inventar, mxzivoty);
@@ -942,14 +961,14 @@ void generujLevel(int Level, float &Zivoty, string Inventar[5], float mxzivoty, 
 
     // Vesnice na urcitych levelech
     if (Level == 3 || Level == 6 || Level == 9 || Level == 12) {
-        vesniceGenerovani(Zivoty, mxzivoty, Inventar, mana, maxmana);
+        vesniceGenerovani(Zivoty, mxzivoty, Inventar, mana, maxmana, penize2);
         // PUVODNE se volalo bez parametru, opraveno
     }
     else if (Level >= 1 && Level <= 15 && !(Level == 3 || Level == 7 || Level == 6 || Level == 9 || Level == 12 || Level == 13 || Level == 15)){
-        generovaniEnemies(Zivoty, mxzivoty, Inventar, klasa, Utok, mana, maxmana);
+        generovaniEnemies(Zivoty, mxzivoty, Inventar, klasa, Utok, mana, maxmana, penize2);
     }
     else if (Level == 7 || Level == 13){
-        generovaniMiniBoss(Zivoty, mxzivoty, Inventar, klasa, Utok, mana, maxmana);
+        generovaniMiniBoss(Zivoty, mxzivoty, Inventar, klasa, Utok, mana, maxmana, penize2);
     }
     else if (Level == 15){
         generovaniBoss(Zivoty, mxzivoty, Inventar, klasa, Utok, mana, maxmana);
@@ -1001,6 +1020,7 @@ int main() {
     float utok = 0.0f;
     float maxenergie = 0.0f;
     float energie = 0.0f;
+    float penize = 0.0f;
 
     // [zivoty, utok, mana] pro kazdou klasu
     float klasyy[4][3] = {
@@ -1095,7 +1115,7 @@ int main() {
 //boss = level 15
 // Prochazeni Levely 1-15
     for (int level = 1; level <= 15; level++) {
-        generujLevel(level, zivoty, inventar, maxzivoty, klasa3, utok, energie, maxenergie);
+        generujLevel(level, zivoty, inventar, maxzivoty, klasa3, utok, energie, maxenergie, penize);
         cout << "\n";
     }
 cout << "Vyhral jsi!";
